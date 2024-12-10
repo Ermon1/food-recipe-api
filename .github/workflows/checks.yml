@@ -1,5 +1,4 @@
 ---
-
 name: Checks
 
 on: [push]
@@ -7,23 +6,40 @@ on: [push]
 jobs:
   test-lints:
     name: Test and Lints
-    runs-on: ubuntu-latest  # Using the latest available Ubuntu version
-    steps:
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+    runs-on: ubuntu-20.04  # You can use a more recent Ubuntu version too.
 
+    steps:
+      # Set debug environment variables
+      - name: Set debug environment variables
+        run: |
+          echo "ACTIONS_RUNNER_DEBUG=true" >> $GITHUB_ENV
+          echo "ACTIONS_STEP_DEBUG=true" >> $GITHUB_ENV
+
+      # Checkout the code from the repository
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Verify Docker Compose installation
+      # Install Docker Compose
+      - name: Install Docker Compose
         run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version  # Verifying that docker-compose is installed
 
+      # Run tests
       - name: Test
-        run: docker-compose run --rm app sh -c "python manage.py test"
+        run: |
+          echo "Checking current directory"
+          pwd  # Check the current directory
+          echo "List files"
+          ls -la  # List all files to verify the test environment
+          docker-compose run --rm app sh -c "python manage.py test"
 
+      # Lint the code
       - name: Lint
-        run: docker-compose run --rm app sh -c "flake8."
+        run: |
+          echo "Checking current directory"
+          pwd  # Check the current directory
+          echo "List files"
+          ls -la  # List all files
+          docker-compose run --rm app sh -c "flake8 ."
