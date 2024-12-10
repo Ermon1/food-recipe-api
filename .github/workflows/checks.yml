@@ -1,5 +1,5 @@
 ---
-  
+
 name: Checks
 
 on: [push]
@@ -17,6 +17,10 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Verify Docker Compose installation
+        run: |
+          docker-compose --version  # Verifying that docker-compose is installed
 
       - name: Test
         run: docker-compose run --rm app sh -c "python manage.py test"
