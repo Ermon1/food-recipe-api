@@ -29,17 +29,9 @@ jobs:
       # Run tests
       - name: Test
         run: |
-          echo "Checking current directory"
-          pwd  # Check the current directory
-          echo "List files"
-          ls -la  # List all files to verify the test environment
           docker-compose run --rm app sh -c "python manage.py test"
 
       # Lint the code
       - name: Lint
         run: |
-          echo "Checking current directory"
-          pwd  # Check the current directory
-          echo "List files"
-          ls -la  # List all files
-          docker-compose run --rm app sh -c "flake8 ."
+          docker-compose run --rm app sh -c "flake8 --config .flake8 ."  # Run flake8 using the .flake8 config
