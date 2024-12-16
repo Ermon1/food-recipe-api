@@ -25,10 +25,14 @@ ARG DEV=false
 # Install dependencies and create the virtual environment
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
+    apk add --update --no-cache postgresql-client && \
+    apk add --update --no-cache --virtual .temp-build-deps \
+        build-base postgresql-dev musl-dev && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     # Install dev dependencies if the DEV argument is true
     if [ "$DEV" = "true" ]; then /py/bin/pip install -r /tmp/requirements.dev.txt; fi && \
     rm -rf /tmp && \
+    apk del .temp-build-deps && \
     # Add a non-root user to the container
     adduser --disabled-password --no-create-home --gecos "" django-user
 
@@ -37,4 +41,3 @@ ENV PATH="/py/bin:$PATH"
 
 # Switch to the non-root user for security reasons
 USER django-user
-
